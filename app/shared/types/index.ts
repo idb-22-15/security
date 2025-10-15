@@ -3,6 +3,7 @@ export interface User {
   password: string
   isBlocked: boolean
   hasPasswordRestrictions: boolean
+  needPasswordChange?: boolean
 }
 
 export interface AuthState {

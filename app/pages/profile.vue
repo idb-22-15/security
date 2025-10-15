@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import ChangePasswordDialog from '@/components/change-password-dialog.vue'
-import AddUserDialog from '@/components/add-user-dialog.vue'
-import UserListDialog from '@/components/user-list-dialog.vue'
-import { AboutCard } from '~/shared/ui'
+import { UserListDialog, AboutCard, AddUserDialog } from '~/shared/ui'
 import { useUsersStore } from '~/shared/model/users'
 
 const router = useRouter()
@@ -13,10 +10,8 @@ if (!currentUser.value) {
   router.push('/')
 }
 
-const isOpenChangePasswordDialog = ref(false)
-
-if (!currentUser.value?.password) {
-  isOpenChangePasswordDialog.value = true
+if (currentUser.value?.needPasswordChange) {
+  router.push('/change-password')
 }
 
 function handleLogout() {
@@ -27,32 +22,32 @@ function handleLogout() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <nav class="bg-white border-b border-gray-200 shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <h1 class="text-xl font-bold text-gray-900">
-            Панель {{ isAdmin ? 'администратора' : 'пользователя' }}
-          </h1>
-          <button
-            class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
-            @click="handleLogout"
-          >
-            Выход
-          </button>
-        </div>
-      </div>
-    </nav>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">
-          Добро пожаловать, {{ currentUser?.username }}
-        </h2>
-      </div>
+  <UPage class="bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 space-y-4 sm:px-6 lg:px-8 py-8">
+      <UButton
+        color="error"
+        variant="soft"
+        @click="handleLogout"
+      >
+        Выход
+      </UButton>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ChangePasswordDialog v-model:open="isOpenChangePasswordDialog" />
+        <UCard
+          class="cursor-pointer"
+        >
+          <NuxtLink to="/change-password">
+            <div class="text-2xl mb-2">
+              🔑
+            </div>
+            <h3 class="font-semibold text-gray-900 mb-1">
+              Сменить пароль
+            </h3>
+            <p class="text-sm text-gray-600">
+              Изменить пароль администратора
+            </p>
+          </NuxtLink>
+        </UCard>
 
         <template v-if="isAdmin">
           <AddUserDialog />
@@ -62,5 +57,5 @@ function handleLogout() {
         <AboutCard />
       </div>
     </div>
-  </div>
+  </UPage>
 </template>

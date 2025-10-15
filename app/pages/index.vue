@@ -1,18 +1,32 @@
 <script setup lang="ts">
-import PasswordInput from '~/components/password-input.vue'
 import { useUsersStore } from '~/shared/model/users'
+import type { FormSubmitEvent } from '@nuxt/ui'
+import { z } from 'zod'
 
 const usersStore = useUsersStore()
 const router = useRouter()
 
-const username = ref('')
-const password = ref('')
 const error = ref('')
 
-function handleLogin() {
-  error.value = ''
+const schema = z.object({
+  username: z.string().min(1),
+  password: z.string(),
+})
 
-  const result = usersStore.login(username.value, password.value)
+type Schema = z.output<typeof schema>
+
+const state = ref({
+  username: '',
+  password: '',
+})
+
+watch(state, () => {
+  error.value = ''
+}, { deep: true })
+
+function onSubmit(e: FormSubmitEvent<Schema>) {
+  const { username, password } = e.data
+  const result = usersStore.login(username, password)
 
   if (!result.success) {
     error.value = result.message
@@ -27,68 +41,63 @@ function handleLogin() {
     return
   }
 
+  if (result.needPasswordChange) {
+    router.push('/change-password')
+    return
+  }
+
   router.push('/profile')
 }
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">
-          Система аутентификации
+  <main class="w-full flex flex-col items-center ">
+    <UCard class="w-sm mt-10">
+      <template #header>
+        <h1 class="text-2xl font-bold ">
+          Вход
         </h1>
-        <p class="text-gray-600">
-          Лабораторная работа №1 - Вариант 14
-        </p>
-      </div>
+      </template>
 
-      <form
-        class="space-y-4"
-        @submit.prevent="handleLogin"
+      <UForm
+        ref="form"
+        :schema="schema"
+        :state="state"
+        class="space-y-4 mx-auto w-full"
+        @submit="onSubmit"
       >
-        <div class="space-y-2">
-          <label
-            for="username"
-            class="block text-sm font-medium text-gray-700"
-          >
-            Имя пользователя
-          </label>
-          <input
-            id="username"
-            v-model="username"
-            type="text"
-            placeholder="Введите имя пользователя"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          >
-        </div>
+        <UFormField
+          label="Имя"
+          name="username"
+        >
+          <UInput
+            v-model="state.username"
+            class="w-full"
+          />
+        </UFormField>
 
-        <PasswordInput
-          id="password"
-          v-model="password"
+        <UFormField
           label="Пароль"
-          placeholder="Введите пароль"
-        />
+          name="password"
+        >
+          <UInput
+            v-model="state.password"
+            class="w-full"
+            type="password"
+          />
+        </UFormField>
 
-        <div
+        <p
           v-if="error"
-          class="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3"
+          class="text-error"
         >
           {{ error }}
-        </div>
+        </p>
 
-        <button
-          type="submit"
-          class="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
-        >
+        <UButton type="submit">
           Войти
-        </button>
-      </form>
-
-      <div class="mt-6 pt-6 border-t border-gray-200 text-center text-sm text-gray-600">
-        <p>При первом входе пароль не установлен (пустая строка)</p>
-      </div>
-    </div>
-  </div>
+        </UButton>
+      </UForm>
+    </UCard>
+  </main>
 </template>

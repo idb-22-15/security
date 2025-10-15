@@ -29,6 +29,7 @@ function handleSubmit() {
     password: '',
     isBlocked: false,
     hasPasswordRestrictions: hasPasswordRestrictions.value,
+    needPasswordChange: true,
   }
 
   usersStore.addUser(newUser)
@@ -37,6 +38,7 @@ function handleSubmit() {
     title: 'Пользователь успешно добавлен',
     color: 'success',
   })
+
   isOpen.value = false
   username.value = ''
   hasPasswordRestrictions.value = false

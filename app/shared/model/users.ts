@@ -8,6 +8,7 @@ const admin: User = {
   password: '',
   isBlocked: false,
   hasPasswordRestrictions: false,
+  needPasswordChange: true,
 }
 
 export const useUsersStore = defineStore('users', () => {
@@ -39,7 +40,8 @@ export const useUsersStore = defineStore('users', () => {
   const login = (username: string, password: string): {
     success: boolean
     message: string
-    rateLimited?: boolean
+    rateLimited?: true
+    needPasswordChange?: boolean
   } => {
     const user = getUserByUsername(username)
     if (!user) return {
@@ -75,6 +77,7 @@ export const useUsersStore = defineStore('users', () => {
     return {
       success: true,
       message: 'Успешный вход',
+      needPasswordChange: user.needPasswordChange,
     }
   }
 

@@ -13,7 +13,12 @@ function toggleBlock(user: User) {
 }
 
 function toggleRestrictions(user: User) {
-  usersStore.updateUser({ ...user, hasPasswordRestrictions: !user.hasPasswordRestrictions })
+  if (!user.hasPasswordRestrictions) {
+    usersStore.updateUser({ ...user, hasPasswordRestrictions: true, needPasswordChange: true })
+  }
+  else {
+    usersStore.updateUser({ ...user, hasPasswordRestrictions: false })
+  }
 }
 </script>
 
@@ -50,7 +55,7 @@ function toggleRestrictions(user: User) {
         class="space-y-3 max-h-96 overflow-y-auto"
       >
         <div
-          v-for="user in usersStore.users"
+          v-for="user in users"
           :key="user.username"
           class="border border-border rounded-lg p-4 space-y-2"
         >
@@ -67,7 +72,6 @@ function toggleRestrictions(user: User) {
           </div>
 
           <div class="text-sm text-muted-foreground space-y-1">
-            <div>Пароль: {{ user.password ? '********' : '(не установлен)' }}</div>
             <div>Ограничения на пароль: {{ user.hasPasswordRestrictions ? 'Да' : 'Нет' }}</div>
           </div>
 
