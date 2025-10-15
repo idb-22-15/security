@@ -42,7 +42,3 @@ export function validatePassword(password: string, hasRestrictions: boolean): Va
 
   return { isValid: true, message: '' }
 }
-
-export function maskPassword(password: string): string {
-  return '*'.repeat(password.length)
-}

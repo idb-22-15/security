@@ -1,55 +1,43 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { getAllUsers, saveUser } from '~/shared/model/storage'
+import { useUsersStore } from '~/shared/model/users'
 import type { User } from '~/shared/types'
 
-const props = defineProps<{
-  isOpen: boolean
-}>()
+const usersStore = useUsersStore()
 
-const emit = defineEmits<{
-  close: []
-}>()
+const users = computed(() => usersStore.users.filter(u => u.username !== 'ADMIN'))
 
-const users = ref<User[]>([])
-
-watch(() => props.isOpen, (isOpen) => {
-  if (isOpen) {
-    loadUsers()
-  }
-})
-
-function loadUsers() {
-  users.value = getAllUsers()
-}
+const isOpen = ref(false)
 
 function toggleBlock(user: User) {
-  user.isBlocked = !user.isBlocked
-  saveUser(user)
-  loadUsers()
+  usersStore.updateUser({ ...user, isBlocked: !user.isBlocked })
 }
 
 function toggleRestrictions(user: User) {
-  user.hasPasswordRestrictions = !user.hasPasswordRestrictions
-  saveUser(user)
-  loadUsers()
-}
-
-function handleClose() {
-  emit('close')
+  usersStore.updateUser({ ...user, hasPasswordRestrictions: !user.hasPasswordRestrictions })
 }
 </script>
 
 <template>
-  <div
-    v-if="isOpen"
-    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+  <UModal
+    v-model:open="isOpen"
+    title="Список пользователей"
   >
-    <div class="bg-background border border-border rounded-lg shadow-lg w-full max-w-2xl p-6">
-      <h2 class="text-xl font-bold text-foreground mb-4">
+    <UCard
+      class="cursor-pointer"
+      @click="isOpen = true"
+    >
+      <div class="text-2xl mb-2">
+        👥
+      </div>
+      <h3 class="font-semibold text-gray-900 mb-1">
         Список пользователей
-      </h2>
+      </h3>
+      <p class="text-sm text-gray-600">
+        Просмотр и управление пользователями
+      </p>
+    </UCard>
 
+    <template #body>
       <div
         v-if="users.length === 0"
         class="text-center text-muted-foreground py-8"
@@ -62,7 +50,7 @@ function handleClose() {
         class="space-y-3 max-h-96 overflow-y-auto"
       >
         <div
-          v-for="user in users"
+          v-for="user in usersStore.users"
           :key="user.username"
           class="border border-border rounded-lg p-4 space-y-2"
         >
@@ -99,15 +87,6 @@ function handleClose() {
           </div>
         </div>
       </div>
-
-      <div class="flex justify-end mt-4">
-        <button
-          class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          @click="handleClose"
-        >
-          Закрыть
-        </button>
-      </div>
-    </div>
-  </div>
+    </template>
+  </UModal>
 </template>

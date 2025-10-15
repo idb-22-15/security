@@ -1,32 +1,15 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { saveUser, getUserByUsername } from '~/shared/model/storage'
+import { useUsersStore } from '~/shared/model/users'
 import type { User } from '~/shared/types'
 
-const props = defineProps<{
-  isOpen: boolean
-}>()
+const usersStore = useUsersStore()
 
-const emit = defineEmits<{
-  close: []
-  success: []
-}>()
+const toast = useToast()
+const isOpen = ref(false)
 
 const username = ref('')
 const hasPasswordRestrictions = ref(false)
 const error = ref('')
-
-watch(() => props.isOpen, (isOpen) => {
-  if (isOpen) {
-    username.value = ''
-    hasPasswordRestrictions.value = false
-    error.value = ''
-  }
-})
-
-function handleClose() {
-  emit('close')
-}
 
 function handleSubmit() {
   error.value = ''
@@ -36,7 +19,7 @@ function handleSubmit() {
     return
   }
 
-  if (getUserByUsername(username.value)) {
+  if (usersStore.getUserByUsername(username.value)) {
     error.value = 'Пользователь с таким именем уже существует'
     return
   }
@@ -48,22 +31,37 @@ function handleSubmit() {
     hasPasswordRestrictions: hasPasswordRestrictions.value,
   }
 
-  saveUser(newUser)
-  emit('success')
-  emit('close')
+  usersStore.addUser(newUser)
+
+  toast.add({
+    title: 'Пользователь успешно добавлен',
+    color: 'success',
+  })
+  isOpen.value = false
+  username.value = ''
+  hasPasswordRestrictions.value = false
 }
 </script>
 
 <template>
-  <div
-    v-if="isOpen"
-    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+  <UModal
+    v-model:open="isOpen"
+    class="cursor-pointer"
+    title="Добавление пользователя"
   >
-    <div class="bg-background border border-border rounded-lg shadow-lg w-full max-w-md p-6">
-      <h2 class="text-xl font-bold text-foreground mb-4">
-        Добавление пользователя
-      </h2>
+    <UCard @click="isOpen = true">
+      <div class="text-2xl mb-2">
+        ➕
+      </div>
+      <h3 class="font-semibold text-gray-900 mb-1">
+        Добавить пользователя
+      </h3>
+      <p class="text-sm text-gray-600">
+        Создать новую учетную запись
+      </p>
+    </UCard>
 
+    <template #body>
       <form
         class="space-y-4"
         @submit.prevent="handleSubmit"
@@ -105,13 +103,6 @@ function handleSubmit() {
 
         <div class="flex gap-2 justify-end">
           <button
-            type="button"
-            class="px-4 py-2 border border-border rounded-md hover:bg-accent"
-            @click="handleClose"
-          >
-            Отмена
-          </button>
-          <button
             type="submit"
             class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
           >
@@ -119,6 +110,6 @@ function handleSubmit() {
           </button>
         </div>
       </form>
-    </div>
-  </div>
+    </template>
+  </UModal>
 </template>
