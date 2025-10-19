@@ -2,6 +2,7 @@
 import { useUsersStore } from '~/shared/model/users'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { z } from 'zod'
+import { exit } from '~/shared/model/exit'
 
 const usersStore = useUsersStore()
 const router = useRouter()
@@ -28,6 +29,10 @@ function onSubmit(e: FormSubmitEvent<Schema>) {
 
   if (!result.success) {
     error.value = result.message
+    setTimeout(() => {
+      alert('Программа будет закрыта из-за неверной парольной фразы')
+      exit()
+    }, 0)
     return
   }
 

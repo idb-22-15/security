@@ -13,6 +13,10 @@ function handleLogout() {
 
   router.push('/')
 }
+
+if (window) {
+  window.open('/', '_self')
+}
 </script>
 
 <template>

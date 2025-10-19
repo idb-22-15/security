@@ -2,6 +2,7 @@
 import { useUsersStore } from '~/shared/model/users'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { z } from 'zod'
+import { exit } from '~/shared/model/exit'
 
 const usersStore = useUsersStore()
 const router = useRouter()
@@ -42,8 +43,8 @@ function onSubmit(e: FormSubmitEvent<Schema>) {
     if (result.rateLimited) {
       setTimeout(() => {
         alert('Программа будет закрыта из-за превышения попыток входа')
-        window.close()
-      }, 2000)
+        exit()
+      })
       return
     }
     return
