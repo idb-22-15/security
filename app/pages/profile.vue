@@ -9,29 +9,14 @@ const { currentUser, isAdmin } = storeToRefs(usersStore)
 if (!currentUser.value) {
   router.push('/')
 }
-
-if (currentUser.value?.needPasswordChange) {
+else if (currentUser.value?.needPasswordChange) {
   router.push('/change-password')
-}
-
-function handleLogout() {
-  usersStore.logout()
-
-  router.push('/')
 }
 </script>
 
 <template>
   <UPage class="bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 space-y-4 sm:px-6 lg:px-8 py-8">
-      <UButton
-        color="error"
-        variant="soft"
-        @click="handleLogout"
-      >
-        Выход
-      </UButton>
-
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <UCard
           class="cursor-pointer"

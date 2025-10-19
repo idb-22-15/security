@@ -16,6 +16,10 @@ const state = ref({
   confirmPassword: '',
 })
 
+if (!usersStore.currentUser) {
+  router.push('/')
+}
+
 const error = ref('')
 
 watch(state, () => {

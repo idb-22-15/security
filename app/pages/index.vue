@@ -6,6 +6,7 @@ import { z } from 'zod'
 const usersStore = useUsersStore()
 const router = useRouter()
 
+const form = useTemplateRef('form')
 const error = ref('')
 
 const schema = z.object({
@@ -19,6 +20,13 @@ const state = ref({
   username: '',
   password: '',
 })
+
+if (!usersStore.isDecrypted) {
+  router.push('/decrypt')
+}
+else if (usersStore.currentUser) {
+  router.push('/profile')
+}
 
 watch(state, () => {
   error.value = ''
@@ -94,7 +102,10 @@ function onSubmit(e: FormSubmitEvent<Schema>) {
           {{ error }}
         </p>
 
-        <UButton type="submit">
+        <UButton
+          type="submit"
+          :disabled="!!form?.errors.length || !!error"
+        >
           Войти
         </UButton>
       </UForm>

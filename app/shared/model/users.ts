@@ -1,9 +1,10 @@
 import type { User } from '~/shared/types'
+import { decryptData, encryptData } from './crypto'
 
 const STORAGE_KEY = 'users_data'
 const MAX_ATTEMPTS = 3
 
-const admin: User = {
+const defaultAdmin: User = {
   username: 'ADMIN',
   password: '',
   isBlocked: false,
@@ -12,22 +13,9 @@ const admin: User = {
 }
 
 export const useUsersStore = defineStore('users', () => {
-  const users = useLocalStorage<User[]>(STORAGE_KEY, () => [admin], {
-    serializer: {
-      read: (data: string) => {
-        console.log('read', data)
-        const parsed = JSON.parse(data)
-        console.log('parsed', parsed)
-        return parsed
-      },
-      write: (data: User[]) => {
-        console.log('write', data)
-        const parsed = JSON.stringify(data)
-        console.log('parsed', parsed)
-        return parsed
-      },
-    },
-  })
+  const users = shallowRef<User[]>([])
+  const passphrase = ref<string | null>(null)
+  const isDecrypted = computed(() => passphrase.value !== null)
 
   const currentUsername = useLocalStorage<string | null>('current_username', null)
   const currentUser = computed(() => currentUsername.value ? users.value.find(u => u.username === currentUsername.value) : null)
@@ -86,21 +74,65 @@ export const useUsersStore = defineStore('users', () => {
   }
 
   const addUser = (user: User) => {
-    users.value.push(user)
+    users.value = [...users.value, user]
+    encryptUsers()
   }
 
   const updateUser = (user: User) => {
-    const index = users.value.findIndex(u => u.username === user.username)
-    if (index !== -1) {
-      users.value[index] = user
-    }
+    users.value = users.value.map(u => u.username === user.username ? user : u)
+    encryptUsers()
   }
 
   const deleteUser = (username: string) => {
-    const index = users.value.findIndex(u => u.username === username)
-    if (index !== -1) {
-      users.value.splice(index, 1)
+    users.value = users.value.filter(u => u.username !== username)
+    encryptUsers()
+  }
+
+  const decryptUsers = (passphrase_: string) => {
+    let storage = localStorage.getItem(STORAGE_KEY)
+
+    if (!storage) {
+      const defaultStorage = encryptData(JSON.stringify([defaultAdmin]), passphrase_)
+      localStorage.setItem(STORAGE_KEY, defaultStorage)
+      storage = defaultStorage
+      console.log('create default storage')
     }
+
+    const decrypted = decryptData(storage, passphrase_)
+    if (!decrypted.success) return decrypted
+
+    console.log('decrypted', decrypted)
+
+    try {
+      const decryptedUsers = JSON.parse(decrypted.data) as User[]
+
+      const admin = decryptedUsers.find(u => u.username === 'ADMIN')
+
+      if (!admin) return {
+        success: false as const,
+        message: 'Неверная парольная фраза 1',
+      }
+
+      users.value = decryptedUsers
+      passphrase.value = passphrase_
+
+      return {
+        success: true as const,
+      }
+    }
+    catch {
+      return {
+        success: false as const,
+        message: 'Неверная парольная фраза 2',
+      }
+    }
+  }
+
+  const encryptUsers = () => {
+    if (passphrase.value === null) throw Error('Passphrase is not set')
+
+    const encrypted = encryptData(JSON.stringify(users.value), passphrase.value)
+    localStorage.setItem(STORAGE_KEY, encrypted)
   }
 
   return {
@@ -108,11 +140,18 @@ export const useUsersStore = defineStore('users', () => {
     currentUser,
     loginAttempts,
     isAdmin,
+    isDecrypted,
+
     getUserByUsername,
+
     login,
     logout,
+
     addUser,
     updateUser,
     deleteUser,
+
+    decryptUsers,
+    encryptUsers,
   }
 })
