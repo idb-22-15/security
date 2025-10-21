@@ -1,5 +1,8 @@
 # Защита информации
 
+Лабораторные 1 и 3
+Вариант 14
+
 ## Setup
 
 Make sure to install dependencies:
