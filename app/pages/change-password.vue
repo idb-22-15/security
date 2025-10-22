@@ -4,6 +4,10 @@ import { z } from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { validatePassword } from '~/shared/model/validation'
 
+definePageMeta({
+  middleware: ['logged-in'],
+})
+
 const usersStore = useUsersStore()
 const toast = useToast()
 const router = useRouter()
@@ -16,9 +20,9 @@ const state = ref({
   confirmPassword: '',
 })
 
-if (!usersStore.currentUser) {
-  router.push('/')
-}
+// if (!usersStore.currentUser) {
+//   router.push('/')
+// }
 
 const error = ref('')
 
@@ -56,12 +60,14 @@ const onSubmit = (e: FormSubmitEvent<Schema>) => {
     return
   }
 
-  console.log('newPassword', newPassword)
   usersStore.updateUser({
     ...usersStore.currentUser,
     password: newPassword,
     needPasswordChange: false,
   })
+
+  console.log('newPassword', newPassword)
+  console.log(usersStore.users)
 
   toast.add({
     title: 'Пароль успешно изменен',
@@ -86,7 +92,7 @@ const onSubmit = (e: FormSubmitEvent<Schema>) => {
         :schema="schema"
         :state="state"
         class="space-y-4 mx-auto w-full"
-        @submit="onSubmit"
+        @submit.prevent="onSubmit"
       >
         <UFormField
           label="Текущий пароль"
@@ -95,6 +101,7 @@ const onSubmit = (e: FormSubmitEvent<Schema>) => {
           <UInput
             v-model="state.currentPassword"
             class="w-full"
+            type="password"
           />
         </UFormField>
 

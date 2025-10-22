@@ -13,17 +13,16 @@ function handleLogout() {
 
   router.push('/')
 }
-
-if (window) {
-  window.open('/', '_self')
-}
 </script>
 
 <template>
   <UApp :locale="ru">
     <UHeader title="<>">
       <template #right>
-        <UPopover v-if="usersStore.currentUser">
+        <UPopover
+          v-if="usersStore.currentUser"
+          mode="hover"
+        >
           <ULink to="/profile">
             {{ usersStore.currentUser.username }}
           </ULink>

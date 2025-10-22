@@ -2,16 +2,19 @@
 import { UserListDialog, AboutCard, AddUserDialog } from '~/shared/ui'
 import { useUsersStore } from '~/shared/model/users'
 
-const router = useRouter()
 const usersStore = useUsersStore()
-const { currentUser, isAdmin } = storeToRefs(usersStore)
+const { isAdmin } = storeToRefs(usersStore)
 
-if (!currentUser.value) {
-  router.push('/')
-}
-else if (currentUser.value?.needPasswordChange) {
-  router.push('/change-password')
-}
+definePageMeta({
+  middleware: ['logged-in', 'need-password-change'],
+})
+
+// if (!currentUser.value) {
+//   router.push('/')
+// }
+// else if (currentUser.value?.needPasswordChange) {
+//   router.push('/change-password')
+// }
 </script>
 
 <template>

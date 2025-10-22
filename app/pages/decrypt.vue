@@ -54,7 +54,7 @@ function onSubmit(e: FormSubmitEvent<Schema>) {
         :schema="schema"
         :state="state"
         class="space-y-4 mx-auto w-full"
-        @submit="onSubmit"
+        @submit.prevent="onSubmit"
       >
         <UFormField
           label="Парольная фраза"
