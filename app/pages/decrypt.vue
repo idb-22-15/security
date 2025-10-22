@@ -63,6 +63,7 @@ function onSubmit(e: FormSubmitEvent<Schema>) {
           <UInput
             v-model="state.passphrase"
             class="w-full"
+            type="password"
           />
         </UFormField>
 

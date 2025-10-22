@@ -3,6 +3,9 @@
 
 import CryptoJS from 'crypto-js'
 
+/**
+ * Хеширование строки с использованием MD5
+ */
 export function md5(str: string): string {
   return CryptoJS.MD5(str).toString()
 }
@@ -19,11 +22,18 @@ export function encryptData(data: string, passphrase: string): string {
     // Хешируем парольную фразу с MD5
     const hashedPassphrase = md5(passphrase)
 
+    // CryptoJS автоматически:
+    // 1. Генерирует случайный salt
+    // 2. Использует режим CBC (по умолчанию)
+    // 3. Добавляет padding (PKCS7)
+    // 4. Генерирует случайный IV
     const encrypted = CryptoJS.AES.encrypt(data, hashedPassphrase, {
       mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.NoPadding,
+      padding: CryptoJS.pad.Pkcs7,
     })
 
+    // Возвращаем зашифрованные данные в формате base64
+    // Формат включает: salt + IV + зашифрованные данные
     return encrypted.toString()
   }
   catch (error) {
@@ -32,6 +42,9 @@ export function encryptData(data: string, passphrase: string): string {
   }
 }
 
+/**
+ * Расшифрование данных с использованием AES-CBC
+ */
 export function decryptData(encryptedData: string, passphrase: string): {
   success: true
   data: string
@@ -40,13 +53,16 @@ export function decryptData(encryptedData: string, passphrase: string): {
   message: string
 } {
   try {
+    // Хешируем парольную фразу с MD5
     const hashedPassphrase = md5(passphrase)
 
+    // CryptoJS автоматически извлекает salt и IV из зашифрованных данных
     const decrypted = CryptoJS.AES.decrypt(encryptedData, hashedPassphrase, {
       mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.ZeroPadding,
+      padding: CryptoJS.pad.Pkcs7,
     })
 
+    // Конвертируем в UTF-8 строку
     const decryptedStr = decrypted.toString(CryptoJS.enc.Utf8)
 
     if (!decryptedStr) {
@@ -66,10 +82,16 @@ export function decryptData(encryptedData: string, passphrase: string): {
   }
 }
 
+/**
+ * Хеширование пароля с MD5
+ */
 export function hashPassword(password: string): string {
   return md5(password)
 }
 
+/**
+ * Проверка хеша пароля
+ */
 export function verifyPassword(password: string, hash: string): boolean {
   return md5(password) === hash
 }

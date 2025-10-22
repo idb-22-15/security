@@ -26,15 +26,6 @@ definePageMeta({
   middleware: ['decrypted', 'logged-in'],
 })
 
-// if (!usersStore.isDecrypted) {
-//   router.push('/decrypt')
-//   console.log('redirect to decrypt')
-// }
-// else if (usersStore.currentUser) {
-//   router.push('/profile')
-//   console.log('redirect to profile')
-// }
-
 watch(state, () => {
   error.value = ''
 }, { deep: true })

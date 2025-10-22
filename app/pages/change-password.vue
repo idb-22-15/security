@@ -20,10 +20,6 @@ const state = ref({
   confirmPassword: '',
 })
 
-// if (!usersStore.currentUser) {
-//   router.push('/')
-// }
-
 const error = ref('')
 
 watch(state, () => {
@@ -74,7 +70,8 @@ const onSubmit = (e: FormSubmitEvent<Schema>) => {
     color: 'success',
   })
 
-  router.push('/profile')
+  usersStore.logout()
+  router.push('/')
 }
 </script>
 

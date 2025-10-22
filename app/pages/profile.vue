@@ -8,13 +8,6 @@ const { isAdmin } = storeToRefs(usersStore)
 definePageMeta({
   middleware: ['logged-in', 'need-password-change'],
 })
-
-// if (!currentUser.value) {
-//   router.push('/')
-// }
-// else if (currentUser.value?.needPasswordChange) {
-//   router.push('/change-password')
-// }
 </script>
 
 <template>
